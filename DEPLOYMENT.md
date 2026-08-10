@@ -10,17 +10,17 @@
 
 | Mục | Nội dung |
 |-----|----------|
-| Họ và tên | (điền họ tên) |
-| Mã học viên | (điền mã học viên) |
-| Repo | (điền link repo K4-DAY12-...) |
+| Họ và tên | Nguyễn Văn Quân |
+| Mã học viên | 2A202601544 |
+| Repo | https://github.com/nguyenvanquan2905/Day12-2A202601544-NguyenVanQuan.git |
 
 ## Service
 
 | Mục | Nội dung |
 |-----|----------|
-| Public URL | https://TODO-thay-bang-url-that.up.railway.app |
-| Platform | Railway / Render / Cloud Run — (điền platform bạn dùng) |
-| Ngày deploy | (điền ngày) |
+| Public URL | https://day12-chat-production-4e57.up.railway.app |
+| Platform | Railway  |
+| Ngày deploy | 10/08/2026 |
 
 ## Biến Môi Trường Đã Set Trên Cloud
 
@@ -30,7 +30,7 @@ Ghi tên biến và **nguồn giá trị**, không ghi giá trị:
 |------|--------|---------|
 | `PORT` | ✅ | platform tự gán |
 | `API_TOKEN` | ✅ | đặt trong dashboard, không nằm trong repo |
-| `REDIS_URL` | ✅ | (điền: Redis add-on của platform / Upstash / ...) |
+| `REDIS_URL` | ✅ | 	Redis add-on của Railway (service day12-chat-redis), set bằng reference ${{day12-chat-redis.REDIS_URL}} |
 | `BUCKET_CAPACITY` | ✅ | 10 |
 | `REFILL_PER_MINUTE` | ✅ | 10 |
 | `DAILY_BUDGET_USD` | ✅ | 1.0 |
@@ -74,7 +74,31 @@ done; echo
 Dán output của các lệnh trên vào đây:
 
 ```
-(điền output)
+$ curl -i https://day12-chat-production-4e57.up.railway.app/healthz
+HTTP/1.1 200 OK
+Content-Type: application/json
+{"status":"ok","service":"day12-chat-service","version":"1.0.0"}
+
+$ curl -i https://day12-chat-production-4e57.up.railway.app/readyz
+HTTP/1.1 200 OK
+Content-Type: application/json
+{"status":"ready","redis":true}
+
+$ curl -i -X POST https://day12-chat-production-4e57.up.railway.app/chat \
+  -H "Content-Type: application/json" \
+  -d '{"message":"test"}'
+HTTP/1.1 401 Unauthorized
+Content-Type: application/json
+www-authenticate: Bearer
+{"detail":"invalid or missing bearer token"}
+
+$ curl -i -X POST https://day12-chat-production-4e57.up.railway.app/chat \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $API_TOKEN" \
+  -d '{"message":"Xin chao"}'
+HTTP/1.1 200 OK
+Content-Type: application/json
+{"reply":"Với Xin chao, cách làm phổ biến trong production là đặt một lớp gateway phía trước để lo authentication, rate limiting và bảo vệ chi phí.","client_id":"anonymous","turns_before":0,"usd_cost":2.07e-05,"usage":{"prompt":2,"completion":34}}
 ```
 
 ## Ảnh Chụp Màn Hình
@@ -86,17 +110,4 @@ Dán output của các lệnh trên vào đây:
 
 ---
 
-## Nếu Dùng Phương Án Dự Phòng
 
-Không đăng ký được tài khoản cloud? Vẫn nộp được bài, nhưng CP5 tối đa 60% điểm:
-
-1. Đặt `LOCAL_FALLBACK=true` trong `.env`
-2. Chạy `docker compose up -d` rồi kiểm tra `docker compose ps`
-3. Chụp màn hình vào `screenshots/`
-4. Chạy `pytest tests/test_cp5.py -v` — bộ test sẽ tự chuyển sang kiểm tra
-   `http://localhost:8000`
-5. Ghi rõ lý do không deploy được vào phần dưới đây:
-
-```
-(điền lý do nếu dùng phương án dự phòng, ngược lại xóa mục này)
-```
